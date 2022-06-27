@@ -1,0 +1,57 @@
+name: "Add Jira link to PR"
+
+on:
+ workflow_call:
+    inputs:
+#       pr-title:
+#         description: "Pull request's title"
+#         required: false
+#         default: "${{ github.event.pull_request.title }}"
+#         type: "string"
+#       github-token:
+#         description: "Github token"
+#         required: true
+#         default: "reference_valid_token_when_calling_workflow"
+#         type: "string"
+      jira-instance-url:
+        description: "URL to Jira instance"
+        required: false
+        default: "https://rtbhouseproduct.atlassian.net/browse"
+        type: "string"
+      jira-project-id:
+        description: "Jira project name"
+        required: false
+        default: "APPS"
+        type: "string"
+    secrets:
+      github-token:
+        description: "GitHub token"
+#         required: true
+
+# env:
+#   GITHUB_TOKEN: ${{ inputs.github-token }}
+
+jobs:
+  add_comment_about_jira_item:
+    runs-on: ubuntu-latest
+    env:
+     jira-prefix: "${{ inputs.jira-project-id }}-"
+     pr-title: ${{ github.event.pull_request.title }}
+#     env:
+#       GITHUB_TOKEN: ${{ input.github-token }}
+    steps:
+      - name: Set JIRA_ID variable
+        run: echo "JIRA_ID=$(echo ${{ env.pr-title }} | awk 'BEGIN { FS = " " } ; { print $1 }')" >> $GITHUB_ENV
+      - name: Add comment with link to Jira
+        if: startsWith(env.pr-title, env.jira-prefix)
+        uses: NejcZdovc/comment-pr@v1
+        with:
+          message: "Jira link [${{ env.JIRA_ID }}](${{ inputs.jira-instance-url }}/${{ env.JIRA_ID }})"
+          single_comment: false
+          github_token: "${{ secrets.github-token }}"
+      - name: Add comment about missing Jira ID
+        if: ${{ !startsWith(env.pr-title, env.jira-prefix) }}
+        uses: NejcZdovc/comment-pr@v1
+        with:
+          message: "PR title should start with Jira ID like `${{ env.jira-prefix }}1234 feat: add super feature`"
+          github_token: "${{ secrets.github-token }}"
