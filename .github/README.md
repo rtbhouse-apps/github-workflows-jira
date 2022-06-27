@@ -1,4 +1,4 @@
-# github-worfklows-jira
+# github-workflows-jira
 This workflow automatically adds to pull request comment with link to Jira item. Jira ID (like `APPS-XXXXX`)
 must be at the beginning at the pull request's title.
 
@@ -26,7 +26,7 @@ on:
 jobs:
   jira_pr_comment:
     name: "Add comment to PR"
-    uses: "rtbhouse-apps/github-worfklows-jira/.github/workflows/add_jira_link_to_pr.yaml@v0"
+    uses: "rtbhouse-apps/github-workflows-jira/.github/workflows/add_jira_link_to_pr.yaml@v0"
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -36,7 +36,7 @@ You may also override parameters `jira-instance-url` and `jira-project-id` in `w
 jobs:
   jira_pr_comment:
     name: "Add comment to PR"
-    uses: "rtbhouse-apps/github-worfklows-jira/.github/workflows/add_jira_link_to_pr.yaml@v0"
+    uses: "rtbhouse-apps/github-workflows-jira/.github/workflows/add_jira_link_to_pr.yaml@v0"
     with:
       jira-instance-url: "https://my_jira_instance.atlassian.net/browse"
       jira-project-id: "MYJIRAPROJECT"
