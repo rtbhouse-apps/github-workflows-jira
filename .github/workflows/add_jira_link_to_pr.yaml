@@ -32,7 +32,7 @@ jobs:
         uses: NejcZdovc/comment-pr@v1
         with:
           message: "Jira link [${{ env.JIRA_ID }}](${{ inputs.jira-instance-url }}/${{ env.JIRA_ID }})"
-          single_comment: false
+          single_comment: true
           github_token: "${{ secrets.github-token }}"
       - name: Add comment about missing Jira ID
         if: ${{ !startsWith(env.pr-title, env.jira-prefix) }}
