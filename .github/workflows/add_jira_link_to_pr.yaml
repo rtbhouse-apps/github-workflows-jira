@@ -15,6 +15,7 @@ on:
         type: "string"
     secrets:
       github-token:
+        required: true
         description: "GitHub token"
 
 jobs:
