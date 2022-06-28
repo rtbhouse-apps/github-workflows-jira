@@ -26,7 +26,7 @@ jobs:
      pr-title: ${{ github.event.pull_request.title }}
     steps:
       - name: Set JIRA_ID variable
-        run: echo "JIRA_ID=$(echo ${{ env.pr-title }} | awk 'BEGIN { FS = " " } ; { print $1 }')" >> $GITHUB_ENV
+        run: echo 'JIRA_ID=$(echo ${{ env.pr-title }} | awk 'BEGIN { FS = " " } ; { print $1 }')' >> $GITHUB_ENV
       - name: Add comment with link to Jira
         if: startsWith(env.pr-title, env.jira-prefix)
         uses: NejcZdovc/comment-pr@v1
