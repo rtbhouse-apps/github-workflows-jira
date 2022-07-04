@@ -25,13 +25,18 @@ jobs:
      jira-prefix: "${{ inputs.jira-project-id }}-"
      pr-title: ${{ github.event.pull_request.title }}
     steps:
-      - name: Set JIRA_ID variable
-        run: echo 'JIRA_ID=$(echo ${{ env.pr-title }} | awk 'BEGIN { FS = " " } ; { print $1 }')' >> $GITHUB_ENV
+      - name: Replace special characters in PR title and store title in txt file
+        run: |
+          echo "${{ env.pr-title }}" | sed 's/(/ /g' | sed 's/)/ /g' | sed 's/#/ /g' >> temp.txt
+          echo "pr_title_escaped=$(cat temp.txt)" >> $GITHUB_ENV
+          rm temp.txt
+      - name: Get Jira ID from PR title
+        run: echo "jira-id=$(echo $pr_title_escaped | awk 'BEGIN { FS = " " } ; { print $1 }')" >> $GITHUB_ENV
       - name: Add comment with link to Jira
         if: startsWith(env.pr-title, env.jira-prefix)
         uses: NejcZdovc/comment-pr@v1
         with:
-          message: "Jira link [${{ env.JIRA_ID }}](${{ inputs.jira-instance-url }}/${{ env.JIRA_ID }})"
+          message: "Jira link [${{ env.jira-id }}](${{ inputs.jira-instance-url }}/${{ env.jira-id }})"
           single_comment: true
           github_token: "${{ secrets.github-token }}"
       - name: Add comment about missing Jira ID
