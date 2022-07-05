@@ -27,21 +27,32 @@ jobs:
     steps:
       - name: Replace special characters in PR title and store title in txt file
         run: |
-          echo "${{ env.pr-title }}" | sed 's/(/ /g' | sed 's/)/ /g' | sed 's/#/ /g' >> temp.txt
+          echo "${{ env.pr-title }}" | sed 's/(/ /g' | sed 's/)/ /g' | sed 's/#/ /g' | sed "s/'/ /g" | sed 's/\"/ /g' | sed 's/\\/ /g' | sed 's/\// /g' >> temp.txt
           echo "pr_title_escaped=$(cat temp.txt)" >> $GITHUB_ENV
           rm temp.txt
       - name: Get Jira ID from PR title
         run: echo "jira-id=$(echo $pr_title_escaped | awk 'BEGIN { FS = " " } ; { print $1 }')" >> $GITHUB_ENV
       - name: Add comment with link to Jira
         if: startsWith(env.pr-title, env.jira-prefix)
-        uses: NejcZdovc/comment-pr@v1
+        uses: actions/github-script@v6
         with:
-          message: "Jira link [${{ env.jira-id }}](${{ inputs.jira-instance-url }}/${{ env.jira-id }})"
-          single_comment: true
-          github_token: "${{ secrets.github-token }}"
+          github-token: ${{ secrets.github-token }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "Jira link [${{ env.jira-id }}](${{ inputs.jira-instance-url }}/${{ env.jira-id }})"
+            })
       - name: Add comment about missing Jira ID
         if: ${{ !startsWith(env.pr-title, env.jira-prefix) }}
-        uses: NejcZdovc/comment-pr@v1
+        uses: actions/github-script@v6
         with:
-          message: "PR title should start with Jira ID like `${{ env.jira-prefix }}1234 feat: add super feature`"
-          github_token: "${{ secrets.github-token }}"
+          github-token: ${{ secrets.github-token }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "PR title should start with Jira ID like `${{ env.jira-prefix }}1234 feat: add super feature`"
+            })

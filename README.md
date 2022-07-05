@@ -3,7 +3,7 @@ This workflow automatically adds to pull request comment with link to Jira item.
 must be at the beginning at the pull request's title.
 
 If PR title doesn't start with valid Jira ID following comment will be added:
-> "PR title should start with Jira ID like `JIRA-1234 feat: add super feature`"
+> PR title should start with Jira ID like `JIRA-1234 feat: add super feature`
 
 
 ## Setup
