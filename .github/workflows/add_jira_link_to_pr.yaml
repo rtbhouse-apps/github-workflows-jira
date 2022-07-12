@@ -25,9 +25,11 @@ jobs:
      jira-prefix: "${{ inputs.jira-project-id }}-"
      pr-title: ${{ github.event.pull_request.title }}
     steps:
-      - name: Log workflow caller details OBSOLETE
+      - name: Log caller details
         run: |
           echo "Actor: ${{ github.actor }}"
+          echo "Event user: ${{ github.event.issue.user.login }}"
+          echo "pr_title_escaped=$(cat temp.txt)" >> $GITHUB_ENV
       - name: Replace special characters in PR title and store title in txt file
         run: |
           echo "${{ env.pr-title }}" | sed 's/(/ /g' | sed 's/)/ /g' | sed 's/#/ /g' | sed "s/'/ /g" | sed 's/\"/ /g' | sed 's/\\/ /g' | sed 's/\// /g' >> temp.txt
@@ -35,7 +37,8 @@ jobs:
           rm temp.txt
       - name: Get Jira ID from PR title
         run: echo "jira-id=$(echo ${{ env.pr_title_escaped }} | grep -o '${{ env.jira-prefix }}[0-9]*')" >> $GITHUB_ENV
-      - name: Get list of comments
+      - name: Add comment with link to Jira
+        if: contains(env.pr-title, env.jira-prefix)
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.github-token }}
@@ -46,12 +49,6 @@ jobs:
              issue_number: context.payload.number,
             })
             const botComment = comments.find(comment => comment.user.login === 'github-actions[bot]')
-      - name: Add comment with link to Jira
-        if: contains(env.pr-title, env.jira-prefix)
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.github-token }}
-          script: |
             const commentBody = "Jira item: [${{ env.jira-id }}](${{ inputs.jira-instance-url }}/${{ env.jira-id }})"
             if (botComment) {
              await github.rest.issues.updateComment({
@@ -74,6 +71,12 @@ jobs:
         with:
           github-token: ${{ secrets.github-token }}
           script: |
+            const {data: comments} = await github.rest.issues.listComments({
+             owner: context.repo.owner,
+             repo: context.repo.repo,
+             issue_number: context.payload.number,
+            })
+            const botComment = comments.find(comment => comment.user.login === 'github-actions[bot]')
             const commentBody = "PR title should contain Jira ID like `${{ env.jira-prefix }}1234`"
             if (botComment) {
              await github.rest.issues.updateComment({
