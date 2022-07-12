@@ -20,6 +20,7 @@ on:
 
 jobs:
   add_comment_about_jira_item:
+    if: ${{ github.actor }} != 'renovate[bot]'
     runs-on: ubuntu-latest
     env:
      jira-prefix: "${{ inputs.jira-project-id }}-"
@@ -28,8 +29,6 @@ jobs:
       - name: Log caller details
         run: |
           echo "Actor: ${{ github.actor }}"
-          echo "Event user: ${{ github.event.issue.user.login }}"
-          echo "pr_title_escaped=$(cat temp.txt)" >> $GITHUB_ENV
       - name: Replace special characters in PR title and store title in txt file
         run: |
           echo "${{ env.pr-title }}" | sed 's/(/ /g' | sed 's/)/ /g' | sed 's/#/ /g' | sed "s/'/ /g" | sed 's/\"/ /g' | sed 's/\\/ /g' | sed 's/\// /g' >> temp.txt
