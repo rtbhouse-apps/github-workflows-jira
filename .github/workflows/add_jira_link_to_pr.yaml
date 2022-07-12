@@ -25,6 +25,12 @@ jobs:
      jira-prefix: "${{ inputs.jira-project-id }}-"
      pr-title: ${{ github.event.pull_request.title }}
     steps:
+      - name: Log caller details
+        run: |
+          echo "Actor: ${{ github.actor }}"
+          echo "Event user: ${{ github.event.issue.user.login }}"
+          echo "pr_title_escaped=$(cat temp.txt)" >> $GITHUB_ENV
+          rm temp.txt
       - name: Replace special characters in PR title and store title in txt file
         run: |
           echo "${{ env.pr-title }}" | sed 's/(/ /g' | sed 's/)/ /g' | sed 's/#/ /g' | sed "s/'/ /g" | sed 's/\"/ /g' | sed 's/\\/ /g' | sed 's/\// /g' >> temp.txt
